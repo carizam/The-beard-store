@@ -1,28 +1,28 @@
+
 const express = require('express');
+const router = express.Router();
+const passport = require('passport');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User'); 
-const router = express.Router();
-const saltRounds = 10;
+require('../config/passport-config')(passport); 
 
-// GET route for the registration page
+// Registration page route
 router.get('/register', (req, res) => {
     res.render('register');
 });
 
-// POST route for user registration
+// Registration route to handle form submission
 router.post('/register', async (req, res) => {
+    const { name, email, password } = req.body;
     try {
-        const { name, email, password } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10); 
-
+        const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             name,
             email,
             password: hashedPassword
         });
-
         await newUser.save();
-        res.redirect('/login'); // Redirect to login after successful registration
+        res.redirect('/login');
     } catch (error) {
         console.error('Error during registration:', error);
         res.status(500).send('Server error during registration');
@@ -34,34 +34,21 @@ router.get('/login', (req, res) => {
     res.render('login');
 });
 
-// POST route for user login
-router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
+// POST route for user login using Passport
+router.post('/login', passport.authenticate('local', {
+    successRedirect: '/dashboard',
+    failureRedirect: '/login',
+    failureFlash: true 
+}));
 
-        if (user && await bcrypt.compare(password, user.password)) {
-            req.session.userId = user._id; // Setting the user's session
-            res.redirect('/dashboard'); // Redirect to dashboard after successful login
-        } else {
-            res.status(401).send('Login failed');
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).send('Server error during login');
-    }
-});
-
-// GET route for logging out
+// Logout route
 router.get('/logout', (req, res) => {
-    req.session.destroy(err => {
-        if (err) {
-            console.error('Error during logout:', err);
-            res.send('Error logging out');
-        } else {
-            res.redirect('/login');
-        }
+    req.logout(function(err) {
+        if (err) { return next(err); }
+        res.redirect('/login');
     });
 });
 
 module.exports = router;
+
+

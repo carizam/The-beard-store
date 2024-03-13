@@ -1,5 +1,9 @@
 <h1>Welcome to The Beard Store!</h1>
 
+{{#if messages.error}}
+  <div class="alert alert-danger">{{messages.error}}</div>
+{{/if}}
+
 <!-- Login Form -->
 <form action="/login" method="POST">
   <div>
@@ -12,6 +16,9 @@
   </div>
   <button type="submit">Login</button>
 </form>
+
+
+
 
 <!-- Register Redirect -->
 <p>Don't have an account? <a href="/register">Register here</a></p>
