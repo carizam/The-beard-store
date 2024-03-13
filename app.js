@@ -10,6 +10,9 @@ const flash = require('connect-flash');
 
 require('./config/passport-config');
 
+// Import error handlers
+const { notFound, errorHandler } = require('./middleware/errorHandlers');
+
 // Initialize Express
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,8 +54,6 @@ app.use((req, res, next) => {
 // MongoDB Atlas connection
 const mongoURI = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 mongoose.connect(mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
 })
 .then(() => console.log('MongoDB Atlas connection established'))
 .catch(err => console.error('Mongo connection error', err));
