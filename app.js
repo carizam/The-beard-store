@@ -8,9 +8,7 @@ const session = require('express-session');
 const passport = require('passport');
 const flash = require('connect-flash');
 
-
-// Passport Config
-require('./config/passport-config')(passport); 
+require('./config/passport-config');
 
 // Initialize Express
 const app = express();
@@ -31,7 +29,7 @@ app.use(session({
     cookie: {
         secure: process.env.NODE_ENV === "production",
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
 }));
 
@@ -39,12 +37,19 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// setting up flash middleware
+// Connect-flash middleware for flash messages
 app.use(flash());
+
+// Global variables for flash messages
+app.use((req, res, next) => {
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    res.locals.error = req.flash('error');
+    next();
+});
 
 // MongoDB Atlas connection
 const mongoURI = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-
 mongoose.connect(mongoURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -60,7 +65,7 @@ const authRoutes = require('./routes/auth');
 app.use('/', indexRoutes);
 app.use('/', authRoutes);
 
-app.use(notFound); // Catch 404 and forward to error handler
+app.use(notFound); // Catch 404 and forwar to error handler
 app.use(errorHandler); // Handle all errors
 
 // Start the server

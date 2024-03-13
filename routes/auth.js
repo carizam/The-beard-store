@@ -1,10 +1,8 @@
-
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User'); 
-require('../config/passport-config')(passport); 
 
 // Registration page route
 router.get('/register', (req, res) => {
@@ -41,8 +39,18 @@ router.post('/login', passport.authenticate('local', {
     failureFlash: true 
 }));
 
+// Redirect to GitHub for authentication
+router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
+
+// GitHub will call this URL
+router.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }),
+  function(req, res) {
+    res.redirect('/dashboard');
+  }
+);
+
 // Logout route
-router.get('/logout', (req, res) => {
+router.get('/logout', (req, res, next) => {
     req.logout(function(err) {
         if (err) { return next(err); }
         res.redirect('/login');
@@ -50,5 +58,3 @@ router.get('/logout', (req, res) => {
 });
 
 module.exports = router;
-
-
