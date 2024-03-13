@@ -5,6 +5,8 @@ const { engine } = require('express-handlebars');
 const bodyParser = require('body-parser');
 const User = require('./models/User');
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const saltRounds = 10;
 
 
 // Initialize Express
@@ -32,11 +34,20 @@ app.get('/register', (req, res) => {
 
 // Route to handle the form submission
 app.post('/register', async (req, res) => {
-    const { name, email, password } = req.body;
     try {
-        let user = new User({ name, email, password });
+        const { name, email, password } = req.body;
+
+        // Hash password before saving the new user
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        let user = new User({
+            name,
+            email,
+            password: hashedPassword 
+        });
+
         await user.save();
-        console.log('User registered:', user);
+
         res.send(`Registered with name: ${name}, email: ${email}. Welcome to The Beard Store!`);
     } catch (error) {
         console.error('Error during registration:', error);
