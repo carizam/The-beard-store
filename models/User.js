@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
+  githubId: String, // Field to store the GitHub user ID
   name: {
     type: String,
-    required: true
+    required: false 
   },
   email: {
     type: String,
@@ -12,8 +13,9 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
+    required: false 
   }
+  
 });
 
 const User = mongoose.model('User', UserSchema);

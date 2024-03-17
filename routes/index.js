@@ -1,6 +1,6 @@
-
 const express = require('express');
 const router = express.Router();
+const Product = require('../models/Products');
 
 // Main route for the application
 router.get('/', (req, res) => {

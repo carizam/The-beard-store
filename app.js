@@ -8,7 +8,11 @@ const session = require('express-session');
 const passport = require('passport');
 const flash = require('connect-flash');
 
-require('./config/passport-config');
+// Import routes
+const indexRoutes = require('./routes/index');
+const authRoutes = require('./routes/auth');
+
+require('./config/passport-config')(passport);
 
 // Import error handlers
 const { notFound, errorHandler } = require('./middleware/errorHandlers');
@@ -58,15 +62,11 @@ mongoose.connect(mongoURI, {
 .then(() => console.log('MongoDB Atlas connection established'))
 .catch(err => console.error('Mongo connection error', err));
 
-// Import routes
-const indexRoutes = require('./routes/index');
-const authRoutes = require('./routes/auth');
-
 // Use routes
 app.use('/', indexRoutes);
 app.use('/', authRoutes);
 
-app.use(notFound); // Catch 404 and forwar to error handler
+app.use(notFound); // Catch 404 and forward to error handler
 app.use(errorHandler); // Handle all errors
 
 // Start the server
