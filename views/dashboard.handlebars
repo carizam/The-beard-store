@@ -1,15 +1,15 @@
-{{!-- {{> header }} --}}
-
-
-<h1>Beard Products Dashboard</h1>
-
-{{!-- Display each product --}}
-{{#each products}}
-  <div class="product">
-    <h3>{{this.name}}</h3>
-    <p>{{this.description}}</p>
-   ->
-  </div>
-{{/each}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <p>Bienvenido, {{user.email}}!</p>
+    <a href="/logout">Cerrar Sesión</a>
+</body>
+</html>
 
 

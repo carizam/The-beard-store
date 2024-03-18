@@ -2,15 +2,20 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const jwt = require('jsonwebtoken');
 
-// Ruta para mostrar el formulario de registro
+// Función hipotética para firmar el token
+function jwtSignUser(user) {
+  return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1d' });
+}
+
+// Registration page route
 router.get('/register', (req, res) => {
     res.render('register');
 });
 
-// Ruta para manejar el envío del formulario de registro
+// Registration route to handle form submission
 router.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
     try {
@@ -28,41 +33,47 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Ruta para mostrar el formulario de login
+// GET route for the login page
 router.get('/login', (req, res) => {
     res.render('login');
 });
 
-// Ruta para manejar el login, modificada para usar JWT
+// POST route for user login using Passport and JWT
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) return next(err);
-    if (!user) return res.status(400).json({ message: info.message });
-
-    req.login(user, { session: false }, (error) => {
-      if (error) res.send(error);
-      const body = { _id: user._id, email: user.email };
-      const token = jwt.sign({ user: body }, process.env.JWT_SECRET, { expiresIn: '1d' });
-
-      return res.json({ token });
+    if (!user) {
+      return res.status(401).json(info);
+    }
+    req.login(user, { session: false }, (loginErr) => {
+      if (loginErr) return next(loginErr);
+      const token = jwtSignUser({ id: user._id });
+      return res.status(200).cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+      }).redirect('/dashboard');
     });
   })(req, res, next);
 });
 
-// Ruta para iniciar sesión con GitHub
+// Redirect to GitHub for authentication
 router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
 
-// Ruta de callback tras la autenticación con GitHub
-router.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
-    res.redirect('/dashboard');
-});
+// GitHub callback URL
+router.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }),
+  function(req, res) {
+    const token = jwtSignUser({ id: req.user._id });
+    res.status(200).cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development',
+    }).redirect('/dashboard');
+  }
+);
 
-// Ruta para cerrar sesión
-router.get('/logout', (req, res, next) => {
-    req.logout(function(err) {
-        if (err) { return next(err); }
-        res.redirect('/login');
-    });
-});
 
+// Logout route
+router.get('/logout', (req, res) => {
+    res.clearCookie('token').redirect('/login');
+  });
+  
 module.exports = router;

@@ -1,31 +1,34 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Products');
+const Product = require('../models/Products'); 
+const authenticateJWT = require('../middleware/authenticateJWT');
 
-// Main route for the application
+// Ruta principal de la aplicación
 router.get('/', (req, res) => {
-    // Check if user is logged in
-    if (req.session && req.session.userId) {
-        res.redirect('/dashboard'); 
-    } else {
-        res.render('login'); 
-    }
+    res.render('login'); 
 });
 
-// Dashboard route
-router.get('/dashboard', (req, res) => {
-    if (!req.isAuthenticated()) {
-        req.flash('error_msg', 'Please log in to view this resource');
-        return res.redirect('/login');
-    }
+// Ruta del dashboard
+router.get('/dashboard', authenticateJWT, (req, res) => {
 
-    // Fetch products from database and render
+    // Recupera productos de la base de datos y los muestra
     Product.find().then(products => {
-        res.render('dashboard', { products });
+        res.render('dashboard', { user: req.user.user, products });
     }).catch(err => {
-        req.flash('error_msg', 'Error loading products');
-        res.redirect('/');
+        console.error('Error loading products', err);
+        res.status(500).send('Error loading products');
     });
 });
+// Ruta para cerrar sesión
+router.get('/logout', (req, res) => {
+    req.logout(function(err) {
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
+      res.redirect('/login');
+    });
+  });
+  
 
 module.exports = router;

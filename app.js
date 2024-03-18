@@ -5,6 +5,8 @@ const { engine } = require('express-handlebars');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const passport = require('passport');
+const cookieParser = require('cookie-parser');
+
 
 // Import routes
 const indexRoutes = require('./routes/index');
@@ -18,6 +20,8 @@ const { notFound, errorHandler } = require('./middleware/errorHandlers');
 // Initialize Express
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(cookieParser());
 
 // Set Handlebars as the view engine
 app.engine('handlebars', engine());
