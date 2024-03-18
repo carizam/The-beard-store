@@ -4,9 +4,7 @@ const express = require('express');
 const { engine } = require('express-handlebars');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const session = require('express-session');
 const passport = require('passport');
-const flash = require('connect-flash');
 
 // Import routes
 const indexRoutes = require('./routes/index');
@@ -28,39 +26,14 @@ app.set('view engine', 'handlebars');
 // Use body-parser middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Session middleware setup
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: process.env.NODE_ENV === "production",
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
-}));
-
 // Passport middleware
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Connect-flash middleware for flash messages
-app.use(flash());
-
-// Global variables for flash messages
-app.use((req, res, next) => {
-    res.locals.success_msg = req.flash('success_msg');
-    res.locals.error_msg = req.flash('error_msg');
-    res.locals.error = req.flash('error');
-    next();
-});
+app.use(passport.initialize()); 
 
 // MongoDB Atlas connection
 const mongoURI = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 mongoose.connect(mongoURI, {
-})
-.then(() => console.log('MongoDB Atlas connection established'))
-.catch(err => console.error('Mongo connection error', err));
+}).then(() => console.log('MongoDB Atlas connection established'))
+  .catch(err => console.error('Mongo connection error', err));
 
 // Use routes
 app.use('/', indexRoutes);

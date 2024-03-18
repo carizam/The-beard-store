@@ -2,14 +2,15 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcryptjs');
-const User = require('../models/User'); 
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-// Registration page route
+// Ruta para mostrar el formulario de registro
 router.get('/register', (req, res) => {
     res.render('register');
 });
 
-// Registration route to handle form submission
+// Ruta para manejar el envío del formulario de registro
 router.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
     try {
@@ -27,29 +28,36 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// GET route for the login page
+// Ruta para mostrar el formulario de login
 router.get('/login', (req, res) => {
     res.render('login');
 });
 
-// POST route for user login using Passport
-router.post('/login', passport.authenticate('local', {
-    successRedirect: '/dashboard',
-    failureRedirect: '/login',
-    failureFlash: true 
-}));
+// Ruta para manejar el login, modificada para usar JWT
+router.post('/login', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) return next(err);
+    if (!user) return res.status(400).json({ message: info.message });
 
-// Redirect to GitHub for authentication
+    req.login(user, { session: false }, (error) => {
+      if (error) res.send(error);
+      const body = { _id: user._id, email: user.email };
+      const token = jwt.sign({ user: body }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+      return res.json({ token });
+    });
+  })(req, res, next);
+});
+
+// Ruta para iniciar sesión con GitHub
 router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
 
-// GitHub will call this URL
-router.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }),
-  function(req, res) {
+// Ruta de callback tras la autenticación con GitHub
+router.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
     res.redirect('/dashboard');
-  }
-);
+});
 
-// Logout route
+// Ruta para cerrar sesión
 router.get('/logout', (req, res, next) => {
     req.logout(function(err) {
         if (err) { return next(err); }
