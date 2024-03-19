@@ -19,16 +19,12 @@ router.get('/dashboard', authenticateJWT, (req, res) => {
         res.status(500).send('Error loading products');
     });
 });
+
 // Ruta para cerrar sesión
 router.get('/logout', (req, res) => {
-    req.logout(function(err) {
-      if (err) {
-        console.log(err);
-        return next(err);
-      }
-      res.redirect('/login');
-    });
-  });
-  
+  res.clearCookie('token').redirect('/login');
+});
 
 module.exports = router;
+  
+

@@ -72,8 +72,13 @@ router.get('/auth/github/callback', passport.authenticate('github', { failureRed
 
 
 // Logout route
-router.get('/logout', (req, res) => {
+router.get('/logout', (req, res, next) => {
+  req.logout(function(err) {
+    if (err) { 
+      return next(err); 
+    }
     res.clearCookie('token').redirect('/login');
   });
+});
   
 module.exports = router;
