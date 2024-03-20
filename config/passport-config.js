@@ -7,68 +7,85 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
 module.exports = function(passport) {
-  // Estrategia Local
-  passport.use(new LocalStrategy({
-      usernameField: 'email',
-      passwordField: 'password'
-    },
-    async (email, password, done) => {
-      try {
-        const user = await User.findOne({ email });
-        if (!user) {
-          return done(null, false, { message: 'That email is not registered' });
+    // Estrategia Local
+    passport.use(new LocalStrategy({
+        usernameField: 'email',
+        passwordField: 'password'
+    }, async (email, password, done) => {
+        try {
+            const user = await User.findOne({ email });
+            if (!user) {
+                return done(null, false, { message: 'El correo electrónico no está registrado.' });
+            }
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (isMatch) {
+                return done(null, user);
+            } else {
+                return done(null, false, { message: 'Contraseña incorrecta.' });
+            }
+        } catch (e) {
+            return done(e);
         }
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (isMatch) {
-          return done(null, user);
-        } else {
-          return done(null, false, { message: 'Password incorrect' });
-        }
-      } catch (e) {
-        return done(e);
-      }
-    }
-  ));
+    }));
 
-  // Estrategia GitHub
-  passport.use(new GitHubStrategy({
-      clientID: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/auth/github/callback"
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        let user = await User.findOne({ githubId: profile.id });
-        if (!user) {
-          user = await User.create({
-            githubId: profile.id,
-            name: profile.displayName,
-            email: profile.emails[0].value
-          });
-        }
-        return done(null, user);
-      } catch (e) {
-        return done(e);
-      }
-    }
-  ));
+    // Estrategia GitHub
+    passport.use(new GitHubStrategy({
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        callbackURL: "http://localhost:3000/auth/github/callback",
+        scope: ['user:email']
+    }, async (accessToken, refreshToken, profile, done) => {
+        try {
+            const email = profile.emails && profile.emails.length > 0 ? profile.emails[0].value : null;
 
-  // Estrategia JWT
-  passport.use(new JwtStrategy({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.JWT_SECRET
-    },
-    async (jwt_payload, done) => {
-      try {
-        const user = await User.findById(jwt_payload.sub);
-        if (user) {
-          return done(null, user);
-        } else {
-          return done(null, false);
+            if (!email) {
+                return done(null, false, { message: 'No se pudo obtener el correo electrónico del perfil de GitHub.' });
+            }
+
+            let user = await User.findOne({ githubId: profile.id }) || await User.findOne({ email });
+
+            if (!user) {
+                user = new User({
+                    githubId: profile.id,
+                    email: email,
+                    first_name: profile.displayName || 'GitHub User'
+                });
+                await user.save();
+            }
+
+            return done(null, user);
+        } catch (e) {
+            return done(e);
         }
-      } catch (error) {
-        return done(error, false);
-      }
-    }
-  ));
+    }));
+
+    // Estrategia JWT
+    passport.use(new JwtStrategy({
+        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+        secretOrKey: process.env.JWT_SECRET
+    }, async (jwt_payload, done) => {
+        try {
+            const user = await User.findById(jwt_payload.sub);
+            if (user) {
+                return done(null, user);
+            } else {
+                return done(null, false);
+            }
+        } catch (error) {
+            return done(error, false);
+        }
+    }));
+
+    passport.serializeUser((user, done) => {
+        done(null, user.id);
+    });
+
+    passport.deserializeUser(async (id, done) => {
+        try {
+            const user = await User.findById(id);
+            done(null, user);
+        } catch (error) {
+            done(error, null);
+        }
+    });
 };

@@ -1,11 +1,13 @@
 // Import necessary modules
 require('dotenv').config();
 const express = require('express');
+const session = require('express-session');
 const { engine } = require('express-handlebars');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const cookieParser = require('cookie-parser');
+
 
 
 // Import routes
@@ -30,8 +32,17 @@ app.set('view engine', 'handlebars');
 // Use body-parser middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Configuración de express-session
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: process.env.NODE_ENV === 'production' } // 
+}));
+
 // Passport middleware
 app.use(passport.initialize()); 
+app.use(passport.session());
 
 // MongoDB Atlas connection
 const mongoURI = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/${process.env.DB_NAME}?retryWrites=true&w=majority`;
