@@ -34,30 +34,34 @@ module.exports = function(passport) {
         clientSecret: process.env.GITHUB_CLIENT_SECRET,
         callbackURL: "http://localhost:3000/auth/github/callback",
         scope: ['user:email']
-    }, async (accessToken, refreshToken, profile, done) => {
+      },
+      async (accessToken, refreshToken, profile, done) => {
         try {
-            const email = profile.emails && profile.emails.length > 0 ? profile.emails[0].value : null;
-
-            if (!email) {
-                return done(null, false, { message: 'No se pudo obtener el correo electrónico del perfil de GitHub.' });
+          let user = await User.findOne({ githubId: profile.id });
+          const email = profile.emails && profile.emails.length > 0 ? profile.emails[0].value : undefined;
+          
+          if (!user) {
+            if (email) {
+              user = await User.findOne({ email: email });
             }
-
-            let user = await User.findOne({ githubId: profile.id }) || await User.findOne({ email });
-
             if (!user) {
-                user = new User({
-                    githubId: profile.id,
-                    email: email,
-                    first_name: profile.displayName || 'GitHub User'
-                });
-                await user.save();
+              user = await User.create({
+                githubId: profile.id,
+                email: email,
+                first_name: profile.displayName || 'GitHub User'
+              });
+            } else {
+              user.githubId = profile.id;
+              await user.save();
             }
-
-            return done(null, user);
-        } catch (e) {
-            return done(e);
+          }
+          
+          return done(null, user);
+        } catch (error) {
+          return done(error);
         }
-    }));
+      }
+    ));
 
     // Estrategia JWT
     passport.use(new JwtStrategy({
@@ -78,14 +82,15 @@ module.exports = function(passport) {
 
     passport.serializeUser((user, done) => {
         done(null, user.id);
-    });
-
-    passport.deserializeUser(async (id, done) => {
+      });
+      
+      passport.deserializeUser(async (id, done) => {
         try {
-            const user = await User.findById(id);
-            done(null, user);
+          const user = await User.findById(id);
+          done(null, user);
         } catch (error) {
-            done(error, null);
+          done(error, null);
         }
-    });
-};
+      });
+      
+}      
