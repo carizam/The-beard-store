@@ -1,15 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-</head>
-<body>
-    <h1>Dashboard</h1>
-    <p>Bienvenido, {{user.email}}!</p>
-    <a href="/logout">Cerrar Sesión</a>
-</body>
-</html>
+<h1>Dashboard</h1>
 
+{{#if products}}
+  <h2>Productos Disponibles</h2>
+  <ul>
+    {{#each products}}
+      <li>
+        <h3>{{this.name}}</h3>
+        <p>Precio: ${{this.price}}</p>
+        <p>Descripción: {{this.description}}</p>
+      </li>
+    {{/each}}
+  </ul>
+{{else}}
+  <p>No hay productos disponibles.</p>
+{{/if}}
 
+{{!-- Agregar producto --}}
+<a href="/products/add" class="btn btn-primary">Agregar Producto</a>
+
+<a href="/logout">Cerrar Sesión</a>

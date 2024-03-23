@@ -9,15 +9,14 @@ router.get('/', (req, res) => {
 });
 
 // Ruta del dashboard
-router.get('/dashboard', authenticateJWT, (req, res) => {
-
-    // Recupera productos de la base de datos y los muestra
-    Product.find().then(products => {
-        res.render('dashboard', { user: req.user.user, products });
-    }).catch(err => {
+router.get('/dashboard', authenticateJWT, async (req, res) => {
+    try {
+        const products = await Product.find({});
+        res.render('dashboard', { products: products.map(product => product.toObject()) });
+    } catch (err) {
         console.error('Error loading products', err);
         res.status(500).send('Error loading products');
-    });
+    }
 });
 
 // Ruta para cerrar sesión

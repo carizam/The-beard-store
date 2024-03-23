@@ -10,6 +10,15 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    inStock: {
+        type: Boolean,
+        default: true
+    }
 });
 
-module.exports = mongoose.model('Product', productSchema);
+
+const Product = mongoose.model('Product', productSchema);
+
+
+module.exports = Product;
+

@@ -1,4 +1,3 @@
-// middleware/errorHandlers.js
 
 // Not Found Error Handler
 const notFound = (req, res, next) => {
