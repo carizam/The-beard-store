@@ -17,11 +17,12 @@ router.get('/register', (req, res) => {
 
 // Procesamiento de registro
 router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body;
+  const { first_name, last_name, email, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
-      name,
+      first_name,
+      last_name,
       email,
       password: hashedPassword
     });

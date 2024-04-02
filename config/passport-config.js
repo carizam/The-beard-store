@@ -9,24 +9,33 @@ const jwt = require('jsonwebtoken');
 module.exports = function(passport) {
     // Estrategia Local
     passport.use(new LocalStrategy({
-        usernameField: 'email',
-        passwordField: 'password'
+      usernameField: 'email',
+      passwordField: 'password'
     }, async (email, password, done) => {
-        try {
-            const user = await User.findOne({ email });
-            if (!user) {
-                return done(null, false, { message: 'El correo electrónico no está registrado.' });
-            }
-            const isMatch = await bcrypt.compare(password, user.password);
-            if (isMatch) {
-                return done(null, user);
-            } else {
-                return done(null, false, { message: 'Contraseña incorrecta.' });
-            }
-        } catch (e) {
-            return done(e);
+      try {
+        const user = await User.findOne({ email });
+        // Si es un usuario de GitHub y no tiene contraseña
+        if (user && user.githubId && !user.password) {
+          return done(null, false, { message: 'Inicia sesión a través de GitHub.' });
         }
+    
+        // Usuario no encontrado o contraseña no configurada.
+        if (!user || !user.password) {
+          return done(null, false, { message: 'Correo electrónico no registrado o contraseña no configurada.' });
+        }
+    
+        // Comprobar si la contraseña es correcta.
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (isMatch) {
+          return done(null, user);
+        } else {
+          return done(null, false, { message: 'Contraseña incorrecta' });
+        }
+      } catch (e) {
+        return done(e);
+      }
     }));
+  
 
     // Estrategia GitHub
     passport.use(new GitHubStrategy({
@@ -47,7 +56,7 @@ module.exports = function(passport) {
             if (!user) {
               user = await User.create({
                 githubId: profile.id,
-                email: email,
+                email: profile.emails[0].value,
                 first_name: profile.displayName || 'GitHub User'
               });
             } else {
