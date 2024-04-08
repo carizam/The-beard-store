@@ -7,7 +7,13 @@ const jwt = require('jsonwebtoken');
 
 // Función para firmar el token
 function jwtSignUser(user) {
-  return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1d' });
+  const payload = {
+    sub: user._id, 
+    email: user.email, 
+    role: user.role 
+  };
+
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
 }
 
 // Ruta de registro
@@ -48,11 +54,9 @@ router.post('/login', (req, res, next) => {
     }
     req.login(user, { session: false }, (loginErr) => {
       if (loginErr) return next(loginErr);
-      const token = jwtSignUser({ id: user._id });
-      return res.status(200).cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== 'development',
-      }).redirect('/dashboard');
+      // Aquí usamos la función jwtSignUser para firmar el token
+      const token = jwtSignUser(user);
+      res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV !== 'development' }).redirect('/dashboard');
     });
   })(req, res, next);
 });
@@ -63,10 +67,11 @@ router.get('/auth/github', passport.authenticate('github', { scope: ['user:email
 // URL de callback de GitHub
 router.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }),
   function(req, res) {
-    const token = jwtSignUser({ id: req.user._id });
-    res.cookie('token', token, { httpOnly: true, secure: true }).redirect('/dashboard');
+    const token = jwtSignUser(req.user);
+    res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV !== 'development' }).redirect('/dashboard');
   }
 );
+
 
 // Ruta para cerrar sesión
 router.get('/logout', (req, res) => {

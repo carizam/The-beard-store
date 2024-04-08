@@ -3,8 +3,6 @@ const router = express.Router();
 const Product = require('../models/Products');
 const authenticateJWT = require('../middleware/authenticateJWT');
 const isAdmin = require('../middleware/isAdmin');
-``
-
 
 // Mostrar formulario para agregar un producto
 router.get('/add', authenticateJWT, isAdmin, (req, res) => {
