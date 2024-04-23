@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>The Beard Store</title>
+    <!-- Tus estilos aquí -->
 </head>
 <body>
     {{{body}}}
+    <header>
+        <nav>
+            <!-- Muestra el carrito y otros enlaces solo si el usuario ha iniciado sesión -->
+            {{#if isAuthenticated}}
+            <!-- Otros elementos de navegación -->
+            <a href="/cart/view">Carrito de Compras <span id="cart-count">0</span></a>
+            <a href="/logout">Cerrar Sesión</a>
+            {{/if}}
+        </nav>
+    </header>
 </body>
 </html>

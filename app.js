@@ -12,6 +12,7 @@ const cookieParser = require('cookie-parser');
 const indexRoutes = require('./routes/index');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/productRoutes');
+const cartRoutes = require('./routes/cartRoutes');
 
 require('./config/passport-config')(passport);
 
@@ -44,6 +45,12 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Middleware para añadir estado de sesión a res.locals
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.isAuthenticated();
+  next();
+});
+
 // MongoDB Atlas connection
 const mongoURI = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 mongoose.connect(mongoURI, {}).then(() => console.log('MongoDB Atlas connection established')).catch(err => console.error('Mongo connection error', err));
@@ -52,6 +59,7 @@ mongoose.connect(mongoURI, {}).then(() => console.log('MongoDB Atlas connection 
 app.use('/', indexRoutes);
 app.use('/', authRoutes);
 app.use('/products', productRoutes);
+app.use('/cart', cartRoutes);
 
 app.use(notFound); // Catch 404 and forward to error handler
 app.use(errorHandler); // Handle all errors

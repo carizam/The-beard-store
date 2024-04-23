@@ -9,10 +9,12 @@ const authenticateJWT = (req, res, next) => {
         return res.sendStatus(403); // Token no válido o expirado
       }
 
-      req.user = decoded; 
+      req.user = decoded;
+      res.locals.isAuthenticated = true; 
       next();
     });
   } else {
+    res.locals.isAuthenticated = false;
     res.sendStatus(401); // No se ha proporcionado token
   }
 };

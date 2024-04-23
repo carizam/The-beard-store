@@ -4,6 +4,7 @@
 {{#if isAdmin}}
   <!-- Solo visible para administradores -->
   <a href="/products/add" class="btn btn-primary">Agregar Producto</a>
+
 {{/if}}
 
 {{#if products}}
@@ -14,14 +15,18 @@
         <h3>{{this.name}}</h3>
         <p>Precio: ${{this.price}}</p>
         <p>Descripción: {{this.description}}</p>
+         <form action="/cart/add" method="POST">
+          <input type="hidden" name="productId" value="{{this._id}}">
+          <input type="hidden" name="quantity" value="1"> <!-- O un input para seleccionar cantidad -->
+          <button type="submit">Agregar al Carrito</button>
+        </form>
+        <!-- Botón Comprar Ahora (opcional) -->
+        <a href="/cart/checkout/{{this._id}}" class="btn btn-primary">Comprar Ahora</a>
       </li>
     {{/each}}
   </ul>
 {{else}}
   <p>No hay productos disponibles.</p>
 {{/if}}
-
-{{!-- Agregar producto --}}
-<a href="/products/add" class="btn btn-primary">Agregar Producto</a>
 
 <a href="/logout">Cerrar Sesión</a>
