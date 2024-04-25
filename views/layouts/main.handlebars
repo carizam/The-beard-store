@@ -4,18 +4,24 @@
     <meta charset="UTF-8">
     <title>The Beard Store</title>
     <!-- Tus estilos aquí -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+
 </head>
 <body>
-    {{{body}}}
     <header>
-        <nav>
-            <!-- Muestra el carrito y otros enlaces solo si el usuario ha iniciado sesión -->
-            {{#if isAuthenticated}}
-            <!-- Otros elementos de navegación -->
-            <a href="/cart/view">Carrito de Compras <span id="cart-count">0</span></a>
-            <a href="/logout">Cerrar Sesión</a>
+    <nav>
+        <!-- Muestra el carrito y otros enlaces solo si el usuario ha iniciado sesión -->
+        {{#if isAuthenticated}}
+            <!-- Update the href to match the backend route -->
+            <a href="/cart"><i class="fas fa-shopping-cart"></i><span id="cart-count">0</span></a>
+            {{#if isAdmin}}
+                <a href="/products/add">Agregar Producto</a>
             {{/if}}
-        </nav>
-    </header>
+            <a href="/logout">Cerrar Sesión</a>
+        {{/if}}
+    </nav>
+</header>
+
+    {{{body}}}
 </body>
 </html>
