@@ -47,13 +47,22 @@ router.get('/login', (req, res) => {
 
 // Procesamiento de inicio de sesión
 router.post('/login', (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
+  passport.authenticate('local', async (err, user, info) => {
     if (err) return next(err);
     if (!user) {
       return res.status(401).json(info);
     }
-    req.login(user, { session: false }, (loginErr) => {
+    req.login(user, { session: false }, async (loginErr) => {
       if (loginErr) return next(loginErr);
+      
+      // Actualizar last_connection
+      try {
+        user.last_connection = new Date();
+        await user.save();
+      } catch (updateError) {
+        console.error('Error actualizando last_connection:', updateError);
+      }
+
       // Aquí usamos la función jwtSignUser para firmar el token
       const token = jwtSignUser(user);
       res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV !== 'development' }).redirect('/dashboard');
@@ -66,15 +75,31 @@ router.get('/auth/github', passport.authenticate('github', { scope: ['user:email
 
 // URL de callback de GitHub
 router.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }),
-  function(req, res) {
+  async function(req, res) {
+    // Actualizar last_connection
+    try {
+      req.user.last_connection = new Date();
+      await req.user.save();
+    } catch (updateError) {
+      console.error('Error actualizando last_connection:', updateError);
+    }
+
     const token = jwtSignUser(req.user);
     res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV !== 'development' }).redirect('/dashboard');
   }
 );
 
-
 // Ruta para cerrar sesión
-router.get('/logout', (req, res) => {
+router.get('/logout', async (req, res) => {
+  if (req.user) {
+    try {
+      req.user.last_connection = new Date();
+      await req.user.save();
+    } catch (updateError) {
+      console.error('Error actualizando last_connection:', updateError);
+    }
+  }
+
   if (req.session) {
     req.session.destroy(() => {
       res.clearCookie('connect.sid', { path: '/' }); 
@@ -84,6 +109,5 @@ router.get('/logout', (req, res) => {
     res.clearCookie('token', { path: '/' }).redirect('/login');
   }
 });
-
 
 module.exports = router;
