@@ -65,8 +65,8 @@ app.use('/products', productRoutes);
 app.use('/carts', cartRoutes);
 app.use('/users', userRoutes);
 
-app.use(notFound); 
-app.use(errorHandler); 
+app.use(notFound); // Catch 404 and forward to error handler
+app.use(errorHandler); // Handle all errors
 
 // Start the server
 app.listen(PORT, () => console.log(`The Beard Store server is running on http://localhost:${PORT}`));
