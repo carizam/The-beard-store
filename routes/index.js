@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Products'); 
+const Product = require('../models/Product'); 
 const authenticateJWT = require('../middleware/authenticateJWT');
 
 // Ruta principal de la aplicación

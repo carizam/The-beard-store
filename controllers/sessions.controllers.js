@@ -1,14 +1,19 @@
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs'); 
 const jwt = require('jsonwebtoken');
 
+/**
+ * User login
+ * @route POST /api/sessions/login
+ * @access Public
+ */
 exports.login = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email });
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-        const isMatch = await bcrypt.compare(req.body.password, user.password);
+        const isMatch = await bcrypt.compare(req.body.password, user.password); // Uso de bcryptjs
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
@@ -18,4 +23,3 @@ exports.login = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
