@@ -10,9 +10,10 @@ const cookieParser = require('cookie-parser');
 
 // Import routes
 const indexRoutes = require('./routes/index');
-const authRoutes = require('./routes/auth');
-const productRoutes = require('./routes/productRoutes');
-const cartRoutes = require('./routes/cartRoutes');
+const sessionRoutes = require('./routes/sessions.router');
+const productRoutes = require('./routes/products.router');
+const cartRoutes = require('./routes/carts.router');
+const userRoutes = require('./routes/user.router');
 
 require('./config/passport-config')(passport);
 
@@ -38,7 +39,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: process.env.NODE_ENV === 'production' } 
+  cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
 
 // Passport middleware
@@ -53,16 +54,19 @@ app.use((req, res, next) => {
 
 // MongoDB Atlas connection
 const mongoURI = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-mongoose.connect(mongoURI, {}).then(() => console.log('MongoDB Atlas connection established')).catch(err => console.error('Mongo connection error', err));
+mongoose.connect(mongoURI, {})
+  .then(() => console.log('MongoDB Atlas connection established'))
+  .catch(err => console.error('Mongo connection error', err));
 
 // Use routes
 app.use('/', indexRoutes);
-app.use('/', authRoutes);
+app.use('/sessions', sessionRoutes);
 app.use('/products', productRoutes);
-app.use('/cart', cartRoutes);
+app.use('/carts', cartRoutes);
+app.use('/users', userRoutes);
 
-app.use(notFound); // Catch 404 and forward to error handler
-app.use(errorHandler); // Handle all errors
+app.use(notFound); 
+app.use(errorHandler); 
 
 // Start the server
 app.listen(PORT, () => console.log(`The Beard Store server is running on http://localhost:${PORT}`));
