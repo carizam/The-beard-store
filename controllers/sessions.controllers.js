@@ -1,5 +1,6 @@
+// controllers/sessions.controllers.js
 const User = require('../models/User');
-const bcrypt = require('bcryptjs'); 
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 /**
@@ -13,7 +14,7 @@ exports.login = async (req, res) => {
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-        const isMatch = await bcrypt.compare(req.body.password, user.password); // Uso de bcryptjs
+        const isMatch = await bcrypt.compare(req.body.password, user.password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }

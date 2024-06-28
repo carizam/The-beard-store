@@ -1,4 +1,3 @@
-// app.js
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -14,7 +13,8 @@ const sessionRoutes = require('./routes/sessions.router');
 const productRoutes = require('./routes/products.router');
 const cartRoutes = require('./routes/carts.router');
 const userRoutes = require('./routes/user.router');
-
+const loginRouter = require('./routes/login.router');
+const registerRouter = require('./routes/register.router');  
 require('./config/passport-config')(passport);
 
 // Import error handlers
@@ -33,6 +33,7 @@ app.set('view engine', 'handlebars');
 
 // Use body-parser middleware
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());  
 
 // Configuración de express-session
 app.use(session({
@@ -60,10 +61,12 @@ mongoose.connect(mongoURI, {})
 
 // Use routes
 app.use('/', indexRoutes);
-app.use('/sessions', sessionRoutes);
-app.use('/products', productRoutes);
-app.use('/carts', cartRoutes);
-app.use('/users', userRoutes);
+app.use('/api/sessions', sessionRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/carts', cartRoutes);
+app.use('/api/users', userRoutes);
+app.use('/login', loginRouter);
+app.use('/register', registerRouter);  
 
 app.use(notFound); // Catch 404 and forward to error handler
 app.use(errorHandler); // Handle all errors
