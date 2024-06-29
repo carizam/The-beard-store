@@ -1,24 +1,80 @@
-<h1>Dashboard</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Dashboard</h1>
 
-{{#if products}}
-  <h2>Productos Disponibles</h2>
-  <ul>
-    {{#each products}}
-      <li>
-        <h3>{{this.name}}</h3>
-        <p>Precio: ${{this.price}}</p>
-        <p>Descripción: {{this.description}}</p>
-        <!-- Formulario para agregar productos al carrito -->
-        <form action="/cart/add" method="POST">
-          <input type="hidden" name="productId" value="{{this._id}}">
-          <input type="hidden" name="quantity" value="1">
-          <button type="submit">Agregar al Carrito</button>
+    {{#if errorMessages}}
+        <div class="alert alert-danger">
+            {{#each errorMessages}}
+                <p>{{this}}</p>
+            {{/each}}
+        </div>
+    {{/if}}
+
+    {{#if successMessages}}
+        <div class="alert alert-success">
+            {{#each successMessages}}
+                <p>{{this}}</p>
+            {{/each}}
+        </div>
+    {{/if}}
+
+    {{#if user}}
+        <p>Bienvenido, {{user.email}}</p>
+    {{/if}}
+
+    {{#if (eq user.role 'admin')}}
+        <h2>Agregar Producto</h2>
+        <form action="/api/products/add" method="POST">
+            <div>
+                <label for="name">Nombre del Producto:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div>
+                <label for="price">Precio:</label>
+                <input type="number" id="price" name="price" required>
+            </div>
+            <div>
+                <label for="description">Descripción:</label>
+                <textarea id="description" name="description" required></textarea>
+            </div>
+            <button type="submit">Agregar Producto</button>
         </form>
-        <!-- Opcional: Botón Comprar Ahora -->
-        <a href="/cart/checkout/{{this._id}}" class="btn btn-primary">Comprar Ahora</a>
-      </li>
-    {{/each}}
-  </ul>
-{{else}}
-  <p>No hay productos disponibles.</p>
-{{/if}}
+    {{/if}}
+
+    {{#if products}}
+        <h2>Productos Disponibles</h2>
+        <ul>
+            {{#each products}}
+                <li>
+                    <h3>{{this.name}}</h3>
+                    <p>Precio: ${{this.price}}</p>
+                    <p>Descripción: {{this.description}}</p>
+                    <!-- Formulario para agregar productos al carrito -->
+                    <form action="/cart/add" method="POST">
+                        <input type="hidden" name="productId" value="{{this._id}}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit">Agregar al Carrito</button>
+                    </form>
+                    <!-- Opcional: Botón Comprar Ahora -->
+                    <a href="/cart/checkout/{{this._id}}" class="btn btn-primary">Comprar Ahora</a>
+
+                    {{#if (eq ../user.role 'admin')}}
+                        <!-- Botón para borrar producto -->
+                        <form action="/api/products/delete/{{this._id}}" method="POST">
+                            <button type="submit">Borrar Producto</button>
+                        </form>
+                    {{/if}}
+                </li>
+            {{/each}}
+        </ul>
+    {{else}}
+        <p>No hay productos disponibles.</p>
+    {{/if}}
+</body>
+</html>
