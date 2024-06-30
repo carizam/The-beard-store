@@ -1,48 +1,21 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Carrito de Compras</title>
-    <link rel="stylesheet" href="/path/to/your/css/file.css">
-</head>
-<body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="/dashboard">Dashboard</a></li>
-                <li>
-                    <a href="/cart">
-                        <i class="fas fa-shopping-cart"></i>
-                        Carrito <span>{{cartCount}}</span>
-                    </a>
-                </li>
-                <li><a href="/logout">Cerrar Sesión</a></li>
-            </ul>
-        </nav>
-    </header>
+<h1>Tú Carrito de Compras</h1>
 
-    <main>
-        <h1>Tú Carrito de Compras</h1>
+{{#if cart.length}}
+  <ul>
+    {{#each cart}}
+      <li>
+        {{this.name}} - ${{this.price}} - Cantidad: {{this.quantity}}
+        <form action="/cart/remove/{{this._id}}" method="POST">
+          <button type="submit">Eliminar</button>
+        </form>
+      </li>
+    {{/each}}
+  </ul>
+  <form action="/cart/empty" method="POST">
+    <button type="submit">Vaciar Carrito</button>
+  </form>
+{{else}}
+  <p>Tu carrito está vacío.</p>
+{{/if}}
 
-        {{#if cart.length}}
-          <ul>
-            {{#each cart}}
-              <li>
-                {{this.name}} - ${{this.price}} - Cantidad: {{this.quantity}}
-                <form action="/cart/remove/{{this.productId}}" method="POST">
-                  <button type="submit">Eliminar</button>
-                </form>
-              </li>
-            {{/each}}
-          </ul>
-          <form action="/cart/empty" method="POST">
-            <button type="submit">Vaciar Carrito</button>
-          </form>
-        {{else}}
-          <p>Tu carrito está vacío.</p>
-        {{/if}}
-
-        <a href="/dashboard">Continuar Comprando</a>
-    </main>
-</body>
-</html>
+<a href="/dashboard">Continuar Comprando</a>

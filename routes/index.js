@@ -15,7 +15,7 @@ router.get('/dashboard', authenticateJWT, async (req, res) => {
         res.render('dashboard', { products: products.map(product => product.toObject()) });
     } catch (err) {
         console.error('Error loading products', err);
-        res.status(500).send('Error loading products - Not Loafing');
+        res.status(500).send('Error loading products');
     }
 });
 
