@@ -37,6 +37,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Configurar el motor de plantillas
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
+app.set('views', path.join(__dirname, 'views'));
 
 // Middleware para manejar los mensajes flash y la autenticación
 app.use((req, res, next) => {
