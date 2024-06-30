@@ -8,19 +8,7 @@
 
 </head>
 <body>
-    <header>
-    <nav>
-        <!-- Muestra el carrito y otros enlaces solo si el usuario ha iniciado sesión -->
-        {{#if isAuthenticated}}
-            <!-- Update the href to match the backend route -->
-            <a href="/cart"><i class="fas fa-shopping-cart"></i><span id="cart-count">0</span></a>
-            {{#if isAdmin}}
-                <a href="/products/add">Agregar Producto</a>
-            {{/if}}
-            <a href="/logout">Cerrar Sesión</a>
-        {{/if}}
-    </nav>
-</header>
+    
 
     {{{body}}}
 </body>

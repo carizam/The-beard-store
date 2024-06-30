@@ -1,24 +1,58 @@
-<h1>Dashboard</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/path/to/your/css/file.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li>
+                    <a href="/cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        Carrito <span>{{cartCount}}</span>
+                    </a>
+                </li>
+                <li><a href="/logout">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+    </header>
 
-{{#if products}}
-  <h2>Productos Disponibles</h2>
-  <ul>
-    {{#each products}}
-      <li>
-        <h3>{{this.name}}</h3>
-        <p>Precio: ${{this.price}}</p>
-        <p>Descripción: {{this.description}}</p>
-        <!-- Formulario para agregar productos al carrito -->
-        <form action="/cart/add" method="POST">
-          <input type="hidden" name="productId" value="{{this._id}}">
-          <input type="hidden" name="quantity" value="1">
-          <button type="submit">Agregar al Carrito</button>
-        </form>
-        <!-- Opcional: Botón Comprar Ahora -->
-        <a href="/cart/checkout/{{this._id}}" class="btn btn-primary">Comprar Ahora</a>
-      </li>
-    {{/each}}
-  </ul>
-{{else}}
-  <p>No hay productos disponibles.</p>
-{{/if}}
+    <main>
+        <h1>Dashboard</h1>
+
+        {{#if success_msg}}
+          <div class="alert alert-success">{{success_msg}}</div>
+        {{/if}}
+
+        {{#if error_msg}}
+          <div class="alert alert-danger">{{error_msg}}</div>
+        {{/if}}
+
+        {{#if products}}
+          <h2>Productos Disponibles</h2>
+          <ul>
+            {{#each products}}
+              <li>
+                <h3>{{this.name}}</h3>
+                <p>Precio: ${{this.price}}</p>
+                <p>Descripción: {{this.description}}</p>
+                <!-- Formulario para agregar productos al carrito -->
+                <form action="/cart/add" method="POST">
+                  <input type="hidden" name="productId" value="{{this._id}}">
+                  <input type="hidden" name="quantity" value="1">
+                  <button type="submit">Agregar al Carrito</button>
+                </form>
+                <!-- Opcional: Botón Comprar Ahora -->
+                <a href="/cart/checkout/{{this._id}}" class="btn btn-primary">Comprar Ahora</a>
+              </li>
+            {{/each}}
+          </ul>
+        {{else}}
+          <p>No hay productos disponibles.</p>
+        {{/if}}
+    </main>
+</body>
+</html>

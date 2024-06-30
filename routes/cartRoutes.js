@@ -3,44 +3,61 @@ const router = express.Router();
 const Product = require('../models/Products');
 const authenticateJWT = require('../middleware/authenticateJWT');
 
-// el carrito se guarda en la sesión del usuario
+// Ruta para agregar productos al carrito
 router.post('/add', authenticateJWT, async (req, res) => {
   try {
     const { productId } = req.body;
+    console.log('Producto ID recibido:', productId);
+
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ success: false, message: 'Producto no encontrado.' });
+      req.flash('error_msg', 'Producto no encontrado.');
+      return res.redirect('/dashboard');
     }
 
-    // el carrito está en req.session.cart
     if (!req.session.cart) {
       req.session.cart = [];
     }
-    req.session.cart.push(product);
 
-    // Respond with JSON including the cart count
-    res.json({ success: true, cartCount: req.session.cart.length, message: 'Producto añadido al carrito.' });
+    // Agregar el producto al carrito
+    req.session.cart.push({
+      productId: product._id,
+      name: product.name,
+      price: product.price,
+      quantity: 1
+    });
+    req.session.cartCount = req.session.cart.length;
+
+    console.log('Producto añadido al carrito:', product);
+    req.flash('success_msg', 'Producto añadido al carrito.');
+    res.redirect('/dashboard');
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Error al añadir el producto al carrito.' });
+    console.error('Error al añadir el producto al carrito:', error);
+    req.flash('error_msg', 'Error al añadir el producto al carrito.');
+    res.redirect('/dashboard');
   }
 });
 
+// Ruta para mostrar el carrito
 router.get('/', authenticateJWT, (req, res) => {
-  // el carrito está en req.session.cart
   res.render('cart', { cart: req.session.cart || [] });
 });
 
+// Ruta para eliminar un producto del carrito
 router.post('/remove/:productId', authenticateJWT, (req, res) => {
   const { productId } = req.params;
-  req.session.cart = req.session.cart.filter(product => product.id !== productId);
-  res.json({ success: true, cartCount: req.session.cart.length, message: 'Producto eliminado del carrito.' });
+  req.session.cart = req.session.cart.filter(product => product.productId.toString() !== productId);
+  req.session.cartCount = req.session.cart.length;
+  req.flash('success_msg', 'Producto eliminado del carrito.');
+  res.redirect('/cart');
 });
 
+// Ruta para vaciar el carrito
 router.post('/empty', authenticateJWT, (req, res) => {
-  // Vaciar el carrito
   req.session.cart = [];
-  res.json({ success: true, cartCount: 0, message: 'El carrito ha sido vaciado.' });
+  req.session.cartCount = 0;
+  req.flash('success_msg', 'El carrito ha sido vaciado.');
+  res.redirect('/cart');
 });
 
 module.exports = router;
