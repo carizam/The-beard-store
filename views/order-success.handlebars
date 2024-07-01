@@ -2,8 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Checkout</title>
+    <title>Éxito en la Orden</title>
     <link rel="stylesheet" href="/path/to/your/css/file.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            alert('Gracias por comprar, acá está tu número de orden: {{orderId}}');
+        });
+    </script>
 </head>
 <body>
     <header>
@@ -21,12 +26,9 @@
     </header>
 
     <main>
-        <h1>Checkout</h1>
-        <p>Producto: {{product.name}}</p>
-        <p>Precio: ${{product.price}}</p>
-        <form action="/checkout" method="POST">
-            <button type="submit">Confirmar Compra</button>
-        </form>
+        <h1>Gracias por tu compra</h1>
+        <p>Tu número de orden es: {{orderId}}</p>
+        <button onclick="window.location.href='/dashboard'">Volver al Dashboard</button>
     </main>
 </body>
 </html>

@@ -1,40 +1,61 @@
-const Order = require('../models/Order');
 const Product = require('../models/Products');
+const Order = require('../models/Order');
 
-// Renderizar la vista de checkout
 exports.renderCheckout = async (req, res) => {
     try {
         const productId = req.params.productId;
         const product = await Product.findById(productId);
         if (!product) {
-            return res.status(404).send('Producto no encontrado');
+            req.flash('error_msg', 'Producto no encontrado.');
+            return res.redirect('/cart');
         }
-        res.render('checkout', { product: product.toObject() });
+        res.render('checkout', { product });
     } catch (error) {
-        res.status(500).send(error);
+        console.error('Error al cargar el producto:', error);
+        req.flash('error_msg', 'Error al cargar el producto.');
+        res.redirect('/cart');
     }
 };
 
-// Procesar la compra y crear una orden
 exports.processOrder = async (req, res) => {
+    console.log('Entrando a processOrder');
     try {
-        const { productId, quantity } = req.body;
-        const product = await Product.findById(productId);
-        if (!product) {
-            return res.status(404).send('Producto no encontrado');
+        console.log('Usuario autenticado:', req.user);
+        const cart = req.session.cart || [];
+        if (cart.length === 0) {
+            req.flash('error_msg', 'El carrito está vacío.');
+            return res.redirect('/cart');
         }
 
-        const totalAmount = product.price * quantity;
+        if (!req.user) {
+            req.flash('error_msg', 'User not authenticated');
+            return res.redirect('/cart');
+        }
 
-        const order = new Order({
-            user: req.user._id,
-            products: [{ product: productId, quantity }],
-            totalAmount,
+        const newOrder = new Order({
+            user: req.user.id,
+            products: cart.map(item => ({
+                product: item.product._id,
+                quantity: item.quantity,
+                price: item.product.price
+            })),
+            total: cart.reduce((total, item) => total + item.quantity * item.product.price, 0)
         });
 
-        await order.save();
-        res.status(201).send(order);
+        await newOrder.save();
+        console.log('Pedido creado:', newOrder);
+
+        req.session.cart = [];
+
+        res.redirect(`/checkout/order-success/${newOrder._id}`);
     } catch (error) {
-        res.status(500).send(error);
+        console.error('Error al procesar la compra:', error);
+        req.flash('error_msg', 'Error al procesar la compra.');
+        res.redirect('/cart');
     }
+};
+
+exports.orderSuccess = (req, res) => {
+    const orderId = req.params.orderId;
+    res.render('order-success', { orderId });
 };
