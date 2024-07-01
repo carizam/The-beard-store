@@ -20,7 +20,7 @@ exports.renderCheckout = async (req, res) => {
 exports.processOrder = async (req, res) => {
     console.log('Entrando a processOrder');
     try {
-        console.log('Usuario autenticado:', req.user);
+        console.log('Usuario autenticado:', req.user); // Mensaje de depuración
         const cart = req.session.cart || [];
         if (cart.length === 0) {
             req.flash('error_msg', 'El carrito está vacío.');
@@ -32,8 +32,10 @@ exports.processOrder = async (req, res) => {
             return res.redirect('/cart');
         }
 
+        console.log('ID de usuario:', req.user.sub); // Cambiado de req.user.id a req.user.sub
+
         const newOrder = new Order({
-            user: req.user.id,
+            user: req.user.sub, // Cambiado de req.user.id a req.user.sub
             products: cart.map(item => ({
                 product: item.product._id,
                 quantity: item.quantity,

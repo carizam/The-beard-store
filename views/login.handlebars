@@ -3,35 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
-    <link rel="stylesheet" href="/path/to/your/css/file.css">
+    <link rel="stylesheet" href="/css/file.css">
 </head>
 <body>
     <main>
         <h1>Welcome to The Beard Store!</h1>
-
-        {{#if messages.error}}
-          <div class="alert alert-danger">{{messages.error}}</div>
-        {{/if}}
-
-        <!-- Login Form -->
-        <form action="/sessions/login" method="POST">
-          <div>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-          </div>
-          <div>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-          </div>
-          <button type="submit">Login</button>
+        <form action="/auth/login" method="POST">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password">
+            </div>
+            <button type="submit">Login</button>
         </form>
-
-        <a href="/auth/github" class="btn btn-social btn-github">
-          <span class="fa fa-github"></span> Sign in with GitHub
-        </a>
-
-        <!-- Register Redirect -->
-        <p>Don't have an account? <a href="/register">Register here</a></p>
+        <p><a href="/auth/github">Sign in with GitHub</a></p>
+        <p>Don't have an account? <a href="/auth/register">Register here</a></p>
     </main>
 </body>
 </html>
