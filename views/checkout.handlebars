@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="/path/to/your/css/file.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li>
+                    <a href="/cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        Carrito <span>{{cartCount}}</span>
+                    </a>
+                </li>
+                <li><a href="/auth/logout">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Checkout</h1>
+
+        <h2>{{product.name}}</h2>
+        <p>Precio: ${{product.price}}</p>
+        <p>Descripción: {{product.description}}</p>
+
+        <form action="/checkout" method="POST">
+            <input type="hidden" name="productId" value="{{product._id}}">
+            <label for="quantity">Cantidad:</label>
+            <input type="number" id="quantity" name="quantity" value="1" min="1">
+            <button type="submit">Comprar Ahora</button>
+        </form>
+    </main>
+</body>
+</html>

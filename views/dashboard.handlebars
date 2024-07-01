@@ -15,7 +15,7 @@
                         Carrito <span>{{cartCount}}</span>
                     </a>
                 </li>
-                <li><a href="#" id="logoutLink">Cerrar Sesión</a></li>
+                <li><a href="/auth/logout">Cerrar Sesión</a></li>
             </ul>
         </nav>
     </header>
@@ -45,8 +45,6 @@
                   <input type="hidden" name="quantity" value="1">
                   <button type="submit">Agregar al Carrito</button>
                 </form>
-                <!-- Opcional: Botón Comprar Ahora -->
-                <a href="/cart/checkout/{{this._id}}" class="btn btn-primary">Comprar Ahora</a>
               </li>
             {{/each}}
           </ul>
@@ -54,22 +52,5 @@
           <p>No hay productos disponibles.</p>
         {{/if}}
     </main>
-
-    <script>
-        document.getElementById('logoutLink').addEventListener('click', (event) => {
-            event.preventDefault();
-            fetch('/auth/logout', {
-                method: 'GET'
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.href = '/auth/login';
-                } else {
-                    console.error('Error al cerrar sesión');
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        });
-    </script>
 </body>
 </html>
