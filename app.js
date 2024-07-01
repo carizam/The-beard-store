@@ -49,19 +49,19 @@ app.use((req, res, next) => {
 });
 
 // Rutas
-const indexRouter = require('./routes/index'); 
-const productsRouter = require('./routes/products.router');
+const indexRouter = require('./routes/index'); // Importar la ruta principal
+const productsRouter = require('./routes/products.router'); // Usar el nombre correcto del archivo
 const cartsRouter = require('./routes/carts.router');
 const userRouter = require('./routes/user.router');
 const sessionsRouter = require('./routes/sessions.router');
-const authRouter = require('./routes/auth');
+const authRouter = require('./routes/auth'); // Asegurarse de importar authRouter
 
-app.use('/', indexRouter); 
+app.use('/', indexRouter); // Usar la ruta principal
 app.use('/products', productsRouter);
 app.use('/cart', cartsRouter);
 app.use('/users', userRouter);
-app.use('/sessions', sessionsRouter); 
-app.use('/auth', authRouter); 
+app.use('/sessions', sessionsRouter); // Usar la ruta de sesiones
+app.use('/auth', authRouter); // Usar la ruta de autenticación
 
 // Conectar a MongoDB
 mongoose.connect(mongoURI)
