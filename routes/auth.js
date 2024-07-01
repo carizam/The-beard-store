@@ -33,7 +33,7 @@ router.post('/register', async (req, res) => {
       password: hashedPassword
     });
     await newUser.save();
-    res.redirect('/login');
+    res.redirect('/auth/login');  // Asegúrate de redirigir a /auth/login
   } catch (error) {
     console.error('Error durante el registro:', error);
     res.status(500).send('Error del servidor durante el registro');
@@ -74,7 +74,7 @@ router.post('/login', (req, res, next) => {
 router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
 
 // URL de callback de GitHub
-router.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }),
+router.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/auth/login' }),
   async function(req, res) {
     // Actualizar last_connection
     try {
@@ -103,10 +103,10 @@ router.get('/logout', async (req, res) => {
   if (req.session) {
     req.session.destroy(() => {
       res.clearCookie('connect.sid', { path: '/' }); 
-      res.clearCookie('token', { path: '/' }).redirect('/login');
+      res.clearCookie('token', { path: '/' }).redirect('/auth/login');
     });
   } else {
-    res.clearCookie('token', { path: '/' }).redirect('/login');
+    res.clearCookie('token', { path: '/' }).redirect('/auth/login');
   }
 });
 
