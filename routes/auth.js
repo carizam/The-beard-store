@@ -52,7 +52,7 @@ router.post('/register', async (req, res) => {
       password: hashedPassword
     });
     await newUser.save();
-    res.redirect('/auth/login');  // Asegúrate de redirigir a /auth/login
+    res.redirect('/auth/login');  
   } catch (error) {
     console.error('Error durante el registro:', error);
     res.status(500).send('Error del servidor durante el registro');
@@ -100,14 +100,12 @@ router.get('/logout', (req, res) => {
     }
   }
 
-  if (req.session) {
-    req.session.destroy(() => {
-      res.clearCookie('connect.sid', { path: '/' }); 
-      res.clearCookie('token', { path: '/' }).redirect('/auth/login');
-    });
-  } else {
-    res.clearCookie('token', { path: '/' }).redirect('/auth/login');
-  }
+  req.logout(function(err) {
+    if (err) { return next(err); }
+    res.clearCookie('connect.sid', { path: '/' }); 
+    res.clearCookie('token', { path: '/' });
+    res.redirect('/auth/login');
+  });
 });
 
 module.exports = router;
