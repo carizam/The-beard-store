@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "echo \"No build step necessary\""
+    "build": "echo \"No build step necessary\"",
+    "test": "jest"
+
   },
   "keywords": [],
   "author": "Carlos Ariza",
