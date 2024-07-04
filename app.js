@@ -8,6 +8,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 const { engine } = require('express-handlebars');
 const cookieParser = require('cookie-parser');
+const methodOverride = require('method-override');
 
 dotenv.config();
 
@@ -22,10 +23,12 @@ const mongoURI = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(methodOverride('_method'));
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
+  cookie: { secure: false }
 }));
 app.use(flash());
 app.use(passport.initialize());

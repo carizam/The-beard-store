@@ -1,7 +1,8 @@
-module.exports = function(req, res, next) {
-  if (req.isAuthenticated() && req.user.role === 'admin') {
-    return next();
+module.exports = (req, res, next) => {
+  console.log('Usuario autenticado:', req.isAuthenticated());
+  console.log('Usuario:', req.user);
+  if (req.isAuthenticated() && req.user && req.user.role === 'admin') {
+      return next();
   }
-  req.flash('error_msg', 'No autorizado');
-  res.redirect('/auth/login');
+  res.redirect('/login');
 };

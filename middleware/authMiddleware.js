@@ -1,11 +1,8 @@
-// Middleware to check if the user is logged in
-const isLoggedIn = (req, res, next) => {
-    if (req.isAuthenticated()) { 
-        return next();
+// Middleware para verificar si el usuario es administrador
+exports.isAdmin = (req, res, next) => {
+    if (req.user && req.user.isAdmin) {
+        next();
+    } else {
+        res.status(403).send('Acceso denegado');
     }
-    res.redirect('/login');
-};
-
-module.exports = {
-    isLoggedIn
 };
