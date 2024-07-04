@@ -8,9 +8,9 @@ const User = require('../models/User');
 // Función para firmar el token
 function jwtSignUser(user) {
   const payload = {
-    sub: user._id, 
-    email: user.email, 
-    role: user.role 
+    sub: user._id,
+    email: user.email,
+    role: user.role
   };
 
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
@@ -40,7 +40,6 @@ router.get('/github', passport.authenticate('github', { scope: ['user:email'] })
  */
 router.get('/github/callback', passport.authenticate('github', { failureRedirect: '/auth/login' }),
   async (req, res) => {
-    // Actualizar last_connection
     try {
       req.user.last_connection = new Date();
       await req.user.save();
@@ -102,7 +101,7 @@ router.post('/register', async (req, res) => {
   const { first_name, last_name, email, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log('Hashed Password during registration:', hashedPassword); // Validación adicional
+    console.log('Hashed Password during registration:', hashedPassword);
     const newUser = new User({
       first_name,
       last_name,
@@ -111,7 +110,7 @@ router.post('/register', async (req, res) => {
     });
     await newUser.save();
     console.log('New user registered:', newUser);
-    res.redirect('/auth/login');  
+    res.redirect('/auth/login');
   } catch (error) {
     console.error('Error durante el registro:', error);
     res.status(500).send('Error del servidor durante el registro');
@@ -129,7 +128,7 @@ router.post('/register', async (req, res) => {
  *         description: Formulario de inicio de sesión
  */
 router.get('/login', (req, res) => {
-  res.render('login'); 
+  res.render('login');
 });
 
 /**
@@ -158,7 +157,7 @@ router.get('/login', (req, res) => {
  *         description: Credenciales incorrectas
  */
 router.post('/login', (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
+  passport.authenticate('local', async (err, user, info) => {
     if (err) {
       console.error('Error during authentication:', err);
       return next(err);
@@ -168,12 +167,25 @@ router.post('/login', (req, res, next) => {
       req.flash('error_msg', info.message);
       return res.redirect('/auth/login');
     }
+
+    // Añade un log para verificar las contraseñas
+    console.log('Password provided:', req.body.password);
+    console.log('Stored hashed password:', user.password);
+
+    // Aquí realizamos la comparación nuevamente como validación adicional
+    const isMatch = await bcrypt.compare(req.body.password, user.password);
+    if (!isMatch) {
+      console.warn('Incorrect password for user:', req.body.email);
+      req.flash('error_msg', 'Contraseña incorrecta');
+      return res.redirect('/auth/login');
+    }
+
     req.login(user, { session: false }, async (loginErr) => {
       if (loginErr) {
         console.error('Error during login:', loginErr);
         return next(loginErr);
       }
-      
+
       // Actualizar last_connection
       try {
         user.last_connection = new Date();
@@ -210,7 +222,7 @@ router.get('/logout', (req, res) => {
 
   req.logout(function(err) {
     if (err) { return next(err); }
-    res.clearCookie('connect.sid', { path: '/' }); 
+    res.clearCookie('connect.sid', { path: '/' });
     res.clearCookie('token', { path: '/' });
     res.redirect('/auth/login');
   });

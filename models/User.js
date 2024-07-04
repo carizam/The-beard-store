@@ -15,14 +15,7 @@ const UserSchema = new Schema({
 // Middleware to hash the password before saving the user
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    console.log('Hashed Password in pre-save middleware:', this.password); // Validación adicional
-    next();
-  } catch (err) {
-    next(err);
-  }
+  next();
 });
 
 module.exports = mongoose.model('User', UserSchema);
