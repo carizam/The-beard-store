@@ -18,11 +18,14 @@ function jwtSignUser(user) {
 
 // Ruta de registro
 router.get('/register', (req, res) => {
+  console.log('GET /register called');
   res.render('register');
 });
 
 // Procesamiento de registro
 router.post('/register', async (req, res) => {
+  console.log('POST /register called');
+  console.log('Request Body:', req.body);  // Agrega este log para verificar los datos enviados
   const { first_name, last_name, email, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -42,11 +45,13 @@ router.post('/register', async (req, res) => {
 
 // Ruta de inicio de sesión
 router.get('/login', (req, res) => {
+  console.log('GET /login called');
   res.render('login');
 });
 
 // Procesamiento de inicio de sesión
 router.post('/login', (req, res, next) => {
+  console.log('POST /login called');
   passport.authenticate('local', async (err, user, info) => {
     if (err) return next(err);
     if (!user) {
