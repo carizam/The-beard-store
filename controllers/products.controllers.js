@@ -1,9 +1,8 @@
-const Product = require('../models/Products');
+const productService = require('../services/productService');
 
 exports.createProduct = async (req, res) => {
     try {
-        const newProduct = new Product(req.body);
-        await newProduct.save();
+        await productService.createProduct(req.body);
         res.redirect('/adminDashboard');
     } catch (error) {
         res.status(500).send('Error al crear el producto');
@@ -12,7 +11,7 @@ exports.createProduct = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
     try {
-        const products = await Product.find();
+        const products = await productService.getAllProducts();
         res.json(products);
     } catch (error) {
         res.status(500).send('Error al obtener los productos');
@@ -21,7 +20,7 @@ exports.getProducts = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
     try {
-        await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        await productService.updateProduct(req.params.id, req.body);
         res.redirect('/adminDashboard');
     } catch (error) {
         res.status(500).send('Error al actualizar el producto');
@@ -30,7 +29,7 @@ exports.updateProduct = async (req, res) => {
 
 exports.deleteProduct = async (req, res) => {
     try {
-        await Product.findByIdAndDelete(req.params.id);
+        await productService.deleteProduct(req.params.id);
         res.redirect('/adminDashboard');
     } catch (error) {
         res.status(500).send('Error al eliminar el producto');

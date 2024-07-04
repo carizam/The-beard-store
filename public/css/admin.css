@@ -72,3 +72,18 @@ form button {
 form button:hover {
     background: #c82333;
 }
+
+/* admin.css */
+.btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #333;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
+.btn:hover {
+    background-color: #e0e0e0;
+}
