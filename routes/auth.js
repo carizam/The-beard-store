@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
-const jwt = require('jsonwebtoken');
 
 // Función para firmar el token
 function jwtSignUser(user) {
@@ -16,16 +16,32 @@ function jwtSignUser(user) {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
 }
 
+// Ruta de autenticación con GitHub
+router.get('/github', passport.authenticate('github', { scope: ['user:email'] }));
+
+// Callback de GitHub
+router.get('/github/callback', passport.authenticate('github', { failureRedirect: '/auth/login' }),
+  async (req, res) => {
+    // Actualizar last_connection
+    try {
+      req.user.last_connection = new Date();
+      await req.user.save();
+    } catch (updateError) {
+      console.error('Error actualizando last_connection:', updateError);
+    }
+
+    const token = jwtSignUser(req.user);
+    res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV !== 'development' }).redirect('/dashboard');
+  }
+);
+
 // Ruta de registro
 router.get('/register', (req, res) => {
-  console.log('GET /register called');
   res.render('register');
 });
 
 // Procesamiento de registro
 router.post('/register', async (req, res) => {
-  console.log('POST /register called');
-  console.log('Request Body:', req.body);  // Agrega este log para verificar los datos enviados
   const { first_name, last_name, email, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -45,17 +61,16 @@ router.post('/register', async (req, res) => {
 
 // Ruta de inicio de sesión
 router.get('/login', (req, res) => {
-  console.log('GET /login called');
-  res.render('login');
+  res.render('login'); 
 });
 
 // Procesamiento de inicio de sesión
 router.post('/login', (req, res, next) => {
-  console.log('POST /login called');
-  passport.authenticate('local', async (err, user, info) => {
+  passport.authenticate('local', (err, user, info) => {
     if (err) return next(err);
     if (!user) {
-      return res.status(401).json(info);
+      req.flash('error_msg', info.message);
+      return res.redirect('/auth/login');
     }
     req.login(user, { session: false }, async (loginErr) => {
       if (loginErr) return next(loginErr);
@@ -68,38 +83,18 @@ router.post('/login', (req, res, next) => {
         console.error('Error actualizando last_connection:', updateError);
       }
 
-      // Aquí usamos la función jwtSignUser para firmar el token
       const token = jwtSignUser(user);
       res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV !== 'development' }).redirect('/dashboard');
     });
   })(req, res, next);
 });
 
-// Redirección a GitHub para autenticación
-router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
-
-// URL de callback de GitHub
-router.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/auth/login' }),
-  async function(req, res) {
-    // Actualizar last_connection
-    try {
-      req.user.last_connection = new Date();
-      await req.user.save();
-    } catch (updateError) {
-      console.error('Error actualizando last_connection:', updateError);
-    }
-
-    const token = jwtSignUser(req.user);
-    res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV !== 'development' }).redirect('/dashboard');
-  }
-);
-
-// Ruta para cerrar sesión
-router.get('/logout', async (req, res) => {
+// Ruta de logout
+router.get('/logout', (req, res) => {
   if (req.user) {
     try {
       req.user.last_connection = new Date();
-      await req.user.save();
+      req.user.save();
     } catch (updateError) {
       console.error('Error actualizando last_connection:', updateError);
     }
