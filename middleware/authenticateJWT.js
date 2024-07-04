@@ -19,7 +19,6 @@ module.exports = function(req, res, next) {
     req.user = decoded;
     console.log('Usuario autenticado:', req.user); // Mensaje de depuración
 
-    // Verificación adicional para asegurarse de que req.user tiene un sub
     if (!req.user.sub) {
       req.flash('error_msg', 'User ID is missing in the token');
       return res.redirect('/auth/login');

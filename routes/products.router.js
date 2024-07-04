@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/products.controllers');
 const isAdmin = require('../middleware/isAdmin');
-const Product = require('../models/Products'); // Asegúrate de tener el modelo importado si lo necesitas aquí
+const Product = require('../models/Products'); // 
 
 router.post('/', isAdmin, productController.createProduct);
 router.get('/', productController.getProducts);
