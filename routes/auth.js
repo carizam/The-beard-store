@@ -45,6 +45,7 @@ router.post('/register', async (req, res) => {
   const { first_name, last_name, email, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('Hashed Password during registration:', hashedPassword); // Validación adicional
     const newUser = new User({
       first_name,
       last_name,
@@ -52,6 +53,7 @@ router.post('/register', async (req, res) => {
       password: hashedPassword
     });
     await newUser.save();
+    console.log('New user registered:', newUser);
     res.redirect('/auth/login');  
   } catch (error) {
     console.error('Error durante el registro:', error);
@@ -67,13 +69,20 @@ router.get('/login', (req, res) => {
 // Procesamiento de inicio de sesión
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
-    if (err) return next(err);
+    if (err) {
+      console.error('Error during authentication:', err);
+      return next(err);
+    }
     if (!user) {
+      console.warn('Authentication failed:', info.message);
       req.flash('error_msg', info.message);
       return res.redirect('/auth/login');
     }
     req.login(user, { session: false }, async (loginErr) => {
-      if (loginErr) return next(loginErr);
+      if (loginErr) {
+        console.error('Error during login:', loginErr);
+        return next(loginErr);
+      }
       
       // Actualizar last_connection
       try {

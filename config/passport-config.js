@@ -11,17 +11,22 @@ module.exports = function(passport) {
       try {
         const user = await User.findOne({ email: email });
         if (!user) {
+          console.warn('User not found:', email);
           return done(null, false, { message: 'No se encontró ese email' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
+        console.log('Password provided:', password);
+        console.log('Stored hashed password:', user.password);
         if (isMatch) {
+          console.log('Password matched for user:', email);
           return done(null, user);
         } else {
+          console.warn('Incorrect password for user:', email);
           return done(null, false, { message: 'Contraseña incorrecta' });
         }
       } catch (err) {
-        console.error(err);
+        console.error('Error during authentication:', err);
         return done(err);
       }
     })
@@ -46,6 +51,7 @@ module.exports = function(passport) {
       }
       return done(null, user);
     } catch (err) {
+      console.error('Error during GitHub authentication:', err);
       return done(err, false);
     }
   }));
@@ -59,6 +65,7 @@ module.exports = function(passport) {
       const user = await User.findById(id);
       done(null, user);
     } catch (err) {
+      console.error('Error during deserialization:', err);
       done(err, null);
     }
   });
