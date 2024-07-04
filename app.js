@@ -12,7 +12,7 @@ const cookieParser = require('cookie-parser');
 dotenv.config();
 
 require('./config/passport-config')(passport);
-const swaggerSetup = require('./config/swagger');
+const swaggerSetup = require('./config/swagger'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -59,6 +59,9 @@ app.use('/users', userRouter);
 app.use('/sessions', sessionsRouter);
 app.use('/auth', authRouter);
 app.use('/checkout', checkoutRouter); 
+
+// Configuración de Swagger
+swaggerSetup(app);
 
 mongoose.connect(mongoURI)
   .then(() => console.log('MongoDB connected'))
