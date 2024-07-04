@@ -12,6 +12,7 @@ const cookieParser = require('cookie-parser');
 dotenv.config();
 
 require('./config/passport-config')(passport);
+const swaggerSetup = require('./config/swagger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
