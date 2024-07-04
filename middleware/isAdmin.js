@@ -1,8 +1,7 @@
-
-module.exports = function (req, res, next) {
-  if (req.user && req.user.role === 'admin') {
+module.exports = function(req, res, next) {
+  if (req.isAuthenticated() && req.user.role === 'admin') {
     return next();
-  } else {
-    res.status(403).send('Acceso denegado. Solo los administradores pueden realizar esta acción.');
   }
+  req.flash('error_msg', 'No autorizado');
+  res.redirect('/auth/login');
 };

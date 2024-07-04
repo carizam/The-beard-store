@@ -3,16 +3,7 @@ const router = express.Router();
 const Product = require('../models/Products');
 const authenticateJWT = require('../middleware/authenticateJWT');
 
-/**
- * @swagger
- * /:
- *   get:
- *     summary: Renderizar la página de login
- *     tags: [Index]
- *     responses:
- *       200:
- *         description: Página de login renderizada
- */
+// Ruta principal de la aplicación
 router.get('/', (req, res) => {
     res.render('login');
 });
@@ -34,7 +25,17 @@ router.get('/', (req, res) => {
 router.get('/dashboard', authenticateJWT, async (req, res) => {
     try {
         const products = await Product.find({});
-        res.render('dashboard', { products: products.map(product => product.toObject()) });
+        if (req.user.role === 'admin') {
+            res.render('adminDashboard', { 
+                products: products.map(product => product.toObject()),
+                isAdmin: true
+            });
+        } else {
+            res.render('dashboard', { 
+                products: products.map(product => product.toObject()),
+                isAdmin: false
+            });
+        }
     } catch (err) {
         console.error('Error loading products', err);
         res.status(500).send('Error loading products');
@@ -49,7 +50,7 @@ router.get('/dashboard', authenticateJWT, async (req, res) => {
  *     tags: [Index]
  *     responses:
  *       200:
- *         description: Sesión cerrada y redirigido al login
+ *         description: Sesión cerrada y redirección al login
  */
 router.get('/logout', (req, res) => {
     res.clearCookie('token').redirect('/login');

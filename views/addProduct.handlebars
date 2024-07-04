@@ -1,19 +1,26 @@
-<h1>Agregar Producto</h1>
-
-<form action="/products/add" method="POST">
-  <div>
-    <label for="name">Nombre del Producto:</label>
-    <input type="text" id="name" name="name" required>
-  </div>
-  <div>
-    <label for="price">Precio:</label>
-    <input type="number" id="price" name="price" required>
-  </div>
-  <div>
-    <label for="description">Descripción:</label>
-    <textarea id="description" name="description" required></textarea>
-  </div>
-  <button type="submit">Agregar Producto</button>
-</form>
-
-<a href="/dashboard">Volver al Dashboard</a>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Añadir Producto</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>Añadir Producto</h1>
+    <form action="/products" method="POST">
+        <div class="form-group">
+            <label for="name">Nombre del Producto:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="price">Precio:</label>
+            <input type="number" id="price" name="price" required>
+        </div>
+        <div class="form-group">
+            <label for="stock">Cantidad en Stock:</label>
+            <input type="number" id="stock" name="stock" required>
+        </div>
+        <button type="submit">Añadir Producto</button>
+    </form>
+</body>
+</html>

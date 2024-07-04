@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/products.controllers');
+const isAdmin = require('../middleware/isAdmin');
 
 /**
  * @swagger
@@ -30,7 +31,7 @@ const productController = require('../controllers/products.controllers');
  *       400:
  *         description: Error en la solicitud
  */
-router.post('/', productController.createProduct);
+router.post('/', isAdmin, productController.createProduct);
 
 /**
  * @swagger
@@ -60,6 +61,55 @@ router.post('/', productController.createProduct);
  *         description: Error en el servidor
  */
 router.get('/', productController.getProducts);
+
+/**
+ * @swagger
+ * /products/new:
+ *   get:
+ *     summary: Renderizar formulario para crear un nuevo producto
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: Formulario renderizado
+ *       401:
+ *         description: No autorizado
+ */
+router.get('/new', isAdmin, (req, res) => {
+    res.render('createProduct');
+});
+
+/**
+ * @swagger
+ * /products/edit/{id}:
+ *   get:
+ *     summary: Renderizar formulario para editar un producto
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del producto
+ *     responses:
+ *       200:
+ *         description: Formulario renderizado
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Producto no encontrado
+ */
+router.get('/edit/:id', isAdmin, async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) {
+            return res.status(404).json({ message: 'Producto no encontrado' });
+        }
+        res.render('editProduct', { product: product.toObject() });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al cargar el producto', error });
+    }
+});
 
 /**
  * @swagger
@@ -98,12 +148,12 @@ router.get('/', productController.getProducts);
  *       404:
  *         description: Producto no encontrado
  */
-router.put('/:id', productController.updateProduct);
+router.put('/:id', isAdmin, productController.updateProduct);
 
 /**
  * @swagger
- * /products/{id}:
- *   delete:
+ * /products/delete/{id}:
+ *   post:
  *     summary: Eliminar un producto por ID
  *     tags: [Products]
  *     parameters:
@@ -119,6 +169,6 @@ router.put('/:id', productController.updateProduct);
  *       404:
  *         description: Producto no encontrado
  */
-router.delete('/:id', productController.deleteProduct);
+router.post('/delete/:id', isAdmin, productController.deleteProduct);
 
 module.exports = router;
